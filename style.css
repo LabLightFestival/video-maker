@@ -1,0 +1,183 @@
+@font-face{font-family:BTitr;src:url('titr.woff2') format('woff2');font-style:normal;font-weight:700;font-display:swap}
+@font-face{font-family:BNazanin;src:url('bnazanin.woff2') format('woff2');font-style:normal;font-weight:700;font-display:swap}
+@font-face{font-family:Vazir;src:url('font.woff2') format('woff2');font-display:swap}
+*{box-sizing:border-box}html{direction:rtl;scroll-behavior:smooth}body{margin:0;color:#f8fafc;font-family:BNazanin,Vazir,Tahoma,sans-serif;font-weight:700;font-size:18px;min-height:100vh;background-color:#0b1425;background-image:radial-gradient(circle at 12% 19%,rgba(255,255,255,.6) 0 1px,transparent 1.5px),radial-gradient(circle at 70% 34%,rgba(179,224,251,.5) 0 1px,transparent 1.5px),radial-gradient(circle at 41% 72%,rgba(255,255,255,.4) 0 1px,transparent 1.5px),radial-gradient(ellipse at 45% -5%,#243c5a 0%,#111f35 45%,#07101e 100%);background-size:211px 187px,277px 223px,343px 281px,100% 100%;background-attachment:fixed}.page{max-width:1280px;margin:0 auto;padding:0 30px}.official-banner{width:100vw;margin-inline:calc(50% - 50vw);background:#fff;line-height:0}.official-banner img{display:block;width:100%;height:auto;max-height:235px;object-fit:cover;object-position:center}.header{display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px;padding:30px 0 0}.brand{display:flex;flex-direction:column;align-items:center;gap:12px}.brand-logo{width:150px;height:150px;object-fit:contain;display:block;border-radius:50%;background:#f7fbf6;box-shadow:0 0 0 4px rgba(191,223,175,.12),0 12px 35px rgba(0,0,0,.34);padding:5px}.brand strong,.brand small{display:block}.brand strong{font-family:BTitr,Tahoma,sans-serif;font-size:clamp(18px,2.4vw,29px);line-height:1.9;color:#f9c94a;text-shadow:0 4px 22px rgba(250,195,43,.2)}.brand small{font-size:18px;color:#d7e5ed;margin-top:4px}.header-pill{color:#acdcd1;background:rgba(31,146,130,.15);border:1px solid rgba(113,211,189,.24);border-radius:30px;padding:4px 15px;font-size:14px}.header-pill i,.live i{display:inline-block;background:#72deaf;border-radius:50%;width:7px;height:7px;margin-left:6px;vertical-align:middle;box-shadow:0 0 10px #78fbd0}main{padding:20px 0 26px}.intro{text-align:center;margin-bottom:34px}.eyebrow{display:inline-block;color:#9fe6dc;background:rgba(18,135,128,.18);border:1px solid rgba(64,201,183,.3);border-radius:24px;padding:6px 16px;font-size:15px}.eyebrow span{color:#ffce57}.intro h1{font-family:BTitr,Tahoma,sans-serif;font-size:clamp(24px,3vw,37px);line-height:1.8;margin:10px 0 3px;color:#f5c34d}.intro h1 em{font-style:normal;background:linear-gradient(105deg,#ffe08a,#ffb435);background-clip:text;-webkit-background-clip:text;color:transparent}.intro p{color:#c2d0df;margin:0;font-size:18px}.workspace{display:grid;grid-template-columns:minmax(325px,.9fr) minmax(420px,1.1fr);gap:22px;align-items:start}.form-card,.preview-card{overflow:hidden;background:rgba(255,255,255,.075);border:1px solid rgba(255,255,255,.18);border-radius:18px;box-shadow:0 24px 55px rgba(0,0,0,.25);backdrop-filter:blur(16px)}.section-head{display:flex;gap:13px;align-items:center;padding:20px 22px;background:linear-gradient(110deg,#076e68,#0d9388 54%,#0994b0);border-bottom:1px solid rgba(255,255,255,.12)}.num{width:38px;height:38px;background:rgba(255,255,255,.19);color:#fff;border-radius:11px;display:grid;place-items:center;flex:none;font-family:BTitr,sans-serif;font-size:18px}.section-head h2{font-family:BTitr,Tahoma,sans-serif;margin:0;font-size:18px;line-height:1.6}.section-head p{margin:3px 0 0;font-size:15px;line-height:1.4;color:#d7fffa}.form-card form{padding:22px 24px 26px}.form-card label{display:block;font-size:17px;color:#94d2ff;margin:16px 0 8px;line-height:1.2}.form-card label:first-child{margin-top:0}.form-card label span:not(.optional){color:#ffb2a7}.form-card input,.form-card select{height:50px;width:100%;border:1px solid rgba(255,255,255,.22);border-radius:11px;background:rgba(5,16,33,.42);color:#fff;padding:0 13px;font:700 18px BNazanin,Vazir,Tahoma,sans-serif;outline:none;transition:.2s}.form-card select option{background:#102039;color:#fff}.form-card input::placeholder{color:#a9b8c8}.form-card input:focus,.form-card select:focus{border-color:#5acbc0;box-shadow:0 0 0 3px rgba(45,181,165,.18)}.hint{font-size:14px;color:#acc3d1;margin:7px 0 0;line-height:1.6}.line{height:1px;background:rgba(255,255,255,.13);margin:20px 0}.upload-box{border:1px dashed rgba(107,220,205,.5);background:rgba(4,25,39,.35);border-radius:12px;padding:13px}.form-card .upload-box input[type=file]{height:auto;padding:8px;border:0;background:transparent;font-size:15px;max-width:100%;direction:rtl}.upload-help,.upload-limit,.file-info{font-size:15px;line-height:1.7;margin:8px 0 0;color:#bed5e0}.upload-limit{color:#80e5c9}.file-info{color:#a4eaca}.file-info.error{color:#ffb4a6}.upload-box input::file-selector-button{border:1px solid rgba(114,218,201,.4);background:rgba(37,155,143,.22);color:#dbfff6;border-radius:8px;padding:8px 12px;font:700 15px BNazanin,Tahoma,sans-serif;cursor:pointer;margin-left:10px}button{font:inherit;cursor:pointer}#generate{border:0;background:linear-gradient(110deg,#f59e0b,#eab308,#ed8a19);color:#fff;border-radius:11px;min-height:55px;width:100%;margin-top:24px;display:flex;align-items:center;justify-content:center;gap:14px;font-family:BTitr,Tahoma,sans-serif;font-size:16px;box-shadow:0 10px 23px rgba(245,158,11,.2);transition:.2s}#generate:hover{filter:brightness(1.08);transform:translateY(-2px)}#generate:disabled{background:#66717a;cursor:not-allowed;transform:none;filter:none}#generate b{font-size:19px}.preview-head{align-items:center}.live{margin-right:auto;color:#dbfff3;font-size:14px;background:rgba(4,76,75,.28);padding:4px 10px;border-radius:20px;white-space:nowrap}.screen{position:relative;overflow:hidden;border-radius:12px;background:#0a1724;aspect-ratio:16/9;margin:24px 24px 0;box-shadow:0 10px 30px rgba(0,0,0,.2)}.screen canvas{width:100%;height:100%;display:block}.screen-label{position:absolute;right:14px;top:14px;background:#0b2828c9;color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:18px;padding:5px 11px;font-size:14px}.screen-label span{color:#ffe084}.preview-footer{display:flex;justify-content:space-between;align-items:center;margin:0 24px;padding:17px 2px 20px;border-bottom:1px solid rgba(255,255,255,.12)}.preview-footer>div{display:flex;gap:10px;align-items:center}.video-icon{width:36px;height:36px;border-radius:10px;background:rgba(45,185,170,.2);display:grid;place-items:center;color:#91ede2;font-size:23px}.preview-footer strong,.preview-footer small{display:block}.preview-footer strong{font-size:16px}.preview-footer small{font-size:14px;color:#b0c1ce;line-height:1.2}.quality{font:12px Vazir,sans-serif;color:#a5c2c8;direction:ltr}.note{background:rgba(8,101,99,.2);border:1px solid rgba(95,215,194,.2);border-radius:12px;padding:15px;display:flex;gap:12px;margin:20px 24px 0}.note-icon{color:#79e8c3;font-size:25px;line-height:1}.note strong{font-size:16px;color:#c4faf0}.note p{font-size:15px;line-height:1.7;color:#bcd5d6;margin:5px 0 0}.steps{display:flex;align-items:center;justify-content:space-between;padding:25px 26px;color:#bfcecf;font-size:14px;white-space:nowrap}.steps b{display:inline-grid;place-items:center;width:23px;height:23px;border:1px solid rgba(125,219,193,.35);border-radius:50%;color:#8de4c9;margin-left:4px}.dots{color:#6b9996;letter-spacing:2px}.progress-wrap{margin-top:17px}.progress-top{display:flex;justify-content:space-between;font-size:15px;color:#b9f1e0}.progress{height:7px;background:rgba(255,255,255,.13);border-radius:5px;margin-top:8px;overflow:hidden}.progress div{height:100%;width:0;background:linear-gradient(90deg,#f5ae2a,#72d9a5);transition:width .2s}.progress-wrap p{font-size:14px;color:#bdcbd3}.cancel{display:block;margin:10px auto 0;background:transparent;border:0;color:#ffc4b6;font-size:15px}.cancel[hidden]{display:none}#status{font-size:15px;color:#ffb3a4;line-height:1.8;margin-top:10px}.result{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:0 24px 24px;border:1px solid rgba(99,218,159,.35);background:rgba(24,145,94,.16);padding:14px;border-radius:10px}.result[hidden]{display:none}.result strong{font-size:17px}.result p{font-size:14px;color:#c6e2d6;margin:4px 0 0}.result a{color:#9eefd1;font-size:15px;font-weight:bold;white-space:nowrap}footer{text-align:center;color:#94aabb;font-size:14px;padding:24px 0 36px}footer span{color:#f5bf4c}@media(max-width:850px){.workspace{grid-template-columns:1fr}.preview-card{grid-row:1}.page{padding:0 18px}.intro{margin-bottom:25px}.header{padding-top:22px}.brand-logo{width:125px;height:125px}}@media(max-width:480px){.page{padding:0 12px}.official-banner img{min-height:72px;object-fit:cover}.brand-logo{width:105px;height:105px}.brand strong{font-size:18px}.brand small{font-size:15px}.eyebrow{font-size:13px}.intro h1{font-size:23px}.intro p{font-size:16px}.section-head{padding:16px}.form-card form{padding:18px}.screen{margin:18px 18px 0}.preview-footer{margin:0 18px}.note{margin:18px 18px 0}.steps{font-size:12px;padding:20px 14px}.dots{letter-spacing:0}.result{margin:0 18px 18px}}
+
+
+footer{font-family:BTitr,Tahoma,sans-serif;font-weight:700;color:#fff;font-size:clamp(15px,1.5vw,19px);line-height:2;padding:30px 0 38px}
+
+/* پیش‌نمایش و دانلود ویدیوی نهایی */
+.result{display:block}.result-heading{margin-bottom:12px}.result video{display:block;width:100%;height:auto;aspect-ratio:16/9;border-radius:10px;background:#050a10}.playback-note{color:#d2e6e5;font-size:14px;line-height:1.7;margin:7px 0}.playback-note:empty{display:none}.result .download-button{display:flex;align-items:center;justify-content:center;min-height:48px;margin-top:14px;border:1px solid rgba(132,235,195,.4);border-radius:10px;background:linear-gradient(110deg,#078579,#16a77f);color:#fff;text-decoration:none;font-family:BTitr,Tahoma,sans-serif;font-size:15px;transition:filter .2s}.result .download-button:hover{filter:brightness(1.12)}.result[hidden]{display:none}
+
+#preview-play{border:0;cursor:pointer;flex:none;font-family:Arial,sans-serif;font-size:16px;transition:background .2s,transform .2s}#preview-play:hover{background:rgba(56,211,188,.35);transform:scale(1.06)}#preview-play:focus-visible{outline:2px solid #8ce9db;outline-offset:3px}#preview-play:disabled{opacity:.45;cursor:not-allowed;transform:none}
+
+.preview-footer>.quality-actions{display:flex;flex-direction:column;align-items:flex-start;gap:7px}.quality-actions #intro-download{border:1px solid rgba(132,235,195,.36);border-radius:8px;background:rgba(9,150,126,.25);color:#d5fff2;font:700 14px BNazanin,Tahoma,sans-serif;padding:5px 10px;white-space:nowrap;cursor:pointer}.quality-actions #intro-download:hover{background:rgba(9,150,126,.45)}.quality-actions #intro-download:disabled{opacity:.45;cursor:not-allowed}.intro-download-info{margin:0 24px;color:#c9eee3;font-size:14px;line-height:1.6}.intro-download-info p:empty{display:none}.intro-download-info p{margin:10px 0 3px}.intro-download-info button,.intro-download-info a{border:0;background:none;padding:0;color:#9eeed4;font:700 14px BNazanin,Tahoma,sans-serif;cursor:pointer}.intro-download-info button[hidden],.intro-download-info a[hidden]{display:none}@media(max-width:480px){.intro-download-info{margin:0 18px}}
+
+/* چیدمان و کنترل‌های لمسی برای تلفن همراه */
+[hidden]{display:none!important}button,a,input,select{-webkit-tap-highlight-color:transparent}button:focus-visible,a:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid #93ead9;outline-offset:3px}
+#intro-screen-hint{color:#bad9d1;font-size:14px;line-height:1.7}
+@media(max-width:600px){
+ .page{padding-right:max(12px,env(safe-area-inset-right));padding-left:max(12px,env(safe-area-inset-left))}
+ .official-banner img{min-height:0;max-height:none;height:auto;object-fit:contain}
+ .header{padding-top:18px}.brand{gap:8px}.brand strong{font-size:17px;line-height:1.75}
+ main{padding-top:12px}.intro{margin-bottom:22px}.intro h1{font-size:clamp(20px,6vw,24px);margin:8px 0}.intro p{font-size:16px;line-height:1.7}
+ .workspace{grid-template-columns:minmax(0,1fr);gap:16px}.workspace>.preview-card{grid-row:auto}
+ .form-card,.preview-card{min-width:0;border-radius:16px}.section-head{padding:14px 16px}.section-head h2{font-size:17px}.section-head p{font-size:14px}
+ .form-card form{padding:18px 16px 20px}.form-card input,.form-card select{min-height:50px;font-size:18px}.form-card label{font-size:17px}
+ .form-card .upload-box input[type=file]{font-size:16px;min-height:48px}.upload-help,.upload-limit,.file-info{font-size:15px;overflow-wrap:anywhere}
+ #generate{min-height:52px}.screen{margin:16px 16px 0}.preview-footer{margin:0 16px;gap:8px}.preview-footer>div:first-child{min-width:0}.preview-footer strong{font-size:15px}.preview-footer small{font-size:13px}
+ #preview-play{width:44px;height:44px;min-width:44px;min-height:44px}.quality-actions #intro-download{min-height:44px;font-size:14px;padding:7px 9px}
+ .intro-download-info{margin:0 16px}.intro-download-info button,.intro-download-info a{display:inline-flex;min-height:44px;align-items:center}.intro-download-info button[hidden],.intro-download-info a[hidden]{display:none}
+ .steps{white-space:normal;gap:6px;justify-content:space-between;font-size:12px;padding:18px 14px}.steps span:not(.dots){display:flex;align-items:center;gap:2px}.steps b{flex:none;margin-left:1px}.steps .dots{display:none}
+ .result{margin:0 16px 16px}.result .download-button{min-height:50px}.cancel{min-height:44px}footer{font-size:15px;padding-bottom:max(30px,env(safe-area-inset-bottom))}
+}
+@media(max-width:360px){.brand strong{font-size:15px}.intro h1{font-size:20px}.preview-footer small{font-size:12px}.quality-actions #intro-download{font-size:13px}.steps{font-size:11px}.steps b{width:20px;height:20px}}
+
+
+/* اندازه و ساختار دقیق لوگوی سایت مرجع */
+.logo-coin-stage{position:relative;display:block;width:6cm;height:6cm;max-width:100%;padding:0;border:0;border-radius:0;background:transparent;cursor:pointer;flex:none;touch-action:manipulation}
+.logo-coin-stage img,.logo-atom{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
+.logo-coin-stage:focus-visible{outline:2px solid #f3d16a;outline-offset:5px;border-radius:50%}
+.logo-coin-text{position:absolute;inset:0;z-index:3;pointer-events:none}
+/* راند ۶۸: لوگوی سکه سه‌بعدی حرفه‌ای — نور از بالا-چپِ بیننده؛ وجه‌ها هنگام دورشدن از نور تیره می‌شوند */
+.logo-coin-stage {
+  perspective: 1600px;
+  perspective-origin: 50% 50%;
+}
+.logo-coin {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  animation: logo-coin-turn 11s linear infinite;
+  will-change: transform;
+}
+.logo-coin-layer {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.logo-coin-front,
+.logo-coin-back {
+  animation: logo-coin-rim-fade 11s linear infinite;
+  /* وجه‌ها یک صفحه تخت هستند؛ لایه‌های داخلی (سایه‌روشن، براقی، اتم) با خودِ وجه پنهان می‌شوند */
+  transform-style: flat;
+}
+.logo-coin-front > *,
+.logo-coin-back > *,
+.logo-coin-front::after,
+.logo-coin-back::after {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.logo-coin-side {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  height: 100%;
+  transform: translateX(-50%) rotateX(6deg);
+  transform-origin: 50% 50%;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.logo-coin-side img { object-fit: fill; }
+.logo-coin-side-l { animation: logo-coin-side-l 11s linear infinite; }
+.logo-coin-side-r { animation: logo-coin-side-r 11s linear infinite; }
+/* ۹۰° = ۲۵٪ زمان، ۲۷۰° = ۷۵٪؛ اول دیواره کاملاً تار می‌شود، بعد بدنه زیر آن خاموش می‌شود */
+@keyframes logo-coin-rim-fade {
+  0%, 24.55%, 25.45%, 74.55%, 75.45%, 100% { opacity: 1; }
+  24.8%, 25.2%, 74.8%, 75.2% { opacity: 0; }
+}
+@keyframes logo-coin-side-l {
+  0%, 24.0%, 26.0%, 100% { opacity: 0; }
+  24.5%, 25.5% { opacity: 1; }
+}
+@keyframes logo-coin-side-r {
+  0%, 74.0%, 76.0%, 100% { opacity: 0; }
+  74.5%, 75.5% { opacity: 1; }
+}
+.logo-coin-rim {
+  /* درست در لحظه لبه‌ای (۹۰° و ۲۷۰°) لایه‌های میانی محو می‌شوند و دیواره یکپارچه جایشان را می‌گیرد */
+  animation: logo-coin-rim-fade 11s linear infinite;
+  backface-visibility: visible;
+  -webkit-backface-visibility: visible;
+}
+/* روشنایی وجه‌ها هم‌گام با زاویه چرخش (نور ثابت در فضا) */
+.logo-coin-face-img {
+  animation: logo-coin-light 11s linear infinite;
+}
+.logo-coin-back .logo-coin-face-img {
+  animation-delay: -5.5s;
+}
+/* سایه‌روشن حجمی روی سطح (کلیپ‌شده به شکل لوگو) */
+.logo-coin-front::after,
+.logo-coin-back::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask: url('logo-body.png') center / contain no-repeat;
+  mask: url('logo-body.png') center / contain no-repeat;
+  background:
+    radial-gradient(circle at 32% 26%, rgba(255, 255, 255, 0.30), rgba(255, 255, 255, 0) 42%),
+    linear-gradient(160deg, rgba(255, 255, 255, 0.10) 0%, rgba(255, 255, 255, 0) 40%, rgba(0, 0, 0, 0.22) 100%);
+  mix-blend-mode: soft-light;
+}
+/* بازتاب نور لغزان (کلیپ‌شده به شکل لوگو) */
+.logo-coin-gloss {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask: url('logo-body.png') center / contain no-repeat;
+  mask: url('logo-body.png') center / contain no-repeat;
+  background: linear-gradient(112deg, rgba(255, 255, 255, 0) 38%, rgba(255, 255, 255, 0.28) 47%, rgba(255, 255, 255, 0.50) 50%, rgba(255, 255, 255, 0.28) 53%, rgba(255, 255, 255, 0) 62%);
+  background-size: 320% 100%;
+  animation: logo-coin-gloss 11s linear infinite;
+  mix-blend-mode: overlay;
+}
+.logo-coin-back .logo-coin-gloss {
+  animation-delay: -5.5s;
+}
+/* سایه روی زمین — با لبه‌شدن سکه باریک می‌شود */
+.logo-coin-ground {
+  position: absolute;
+  left: 50%;
+  bottom: -7%;
+  width: 80%;
+  height: 12%;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0) 70%);
+  filter: blur(5px);
+  animation: logo-coin-ground 11s linear infinite;
+}
+@keyframes logo-coin-turn {
+  0%   { transform: rotateX(6deg) rotateY(0deg); }
+  100% { transform: rotateX(6deg) rotateY(-360deg); }
+}
+/* روی سکه: ۰٪ رو به بیننده (روشن‌ترین)، ۲۵٪/۷۵٪ لبه (تیره‌ترین) */
+@keyframes logo-coin-light {
+  0%   { filter: brightness(1.10) contrast(1.03); }
+  25%  { filter: brightness(0.55) contrast(1.0); }
+  50%  { filter: brightness(0.9) contrast(1.0); }
+  75%  { filter: brightness(0.55) contrast(1.0); }
+  100% { filter: brightness(1.10) contrast(1.03); }
+}
+@keyframes logo-coin-gloss {
+  0%   { background-position: 220% 0; }
+  50%  { background-position: -120% 0; }
+  100% { background-position: 220% 0; }
+}
+@keyframes logo-coin-ground {
+  0%, 50%, 100% { transform: translateX(-50%) scaleX(1); opacity: 0.95; }
+  25%, 75%      { transform: translateX(-50%) scaleX(0.18); opacity: 0.55; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-coin, .logo-coin-gloss, .logo-coin-ground, .logo-coin-face-img, .logo-coin-rim, .logo-coin-front, .logo-coin-back { animation: none; }
+  .logo-coin-side { display: none; }
+  [data-logo-atom-svg] animateMotion { display: none; }
+}
+
+
