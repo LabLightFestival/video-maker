@@ -183,3 +183,13 @@ footer{font-family:BTitr,Tahoma,sans-serif;font-weight:700;color:#fff;font-size:
 
 
 .intro-scope-note{font-size:14px;line-height:1.7;color:#c9dce0;margin:0 0 7px} .quality-actions #intro-download{white-space:normal;line-height:1.35}
+
+/* Match the reference site's full-width banner height without cropping. */
+.official-banner img{
+ width:100%;
+ height:max(calc(10vw + 3mm),calc(20.17094vw - 3cm));
+ min-height:0;
+ max-height:none;
+ object-fit:fill;
+ object-position:center;
+}
