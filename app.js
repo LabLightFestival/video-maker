@@ -4,7 +4,17 @@ const video=$('source'),previewPlayer=$('preview-player'),previewPlay=$('preview
 const fields=['province','region','teachers','subject'].map($);
 const form=$('form'),button=$('generate'),cancel=$('cancel'),status=$('status'),wrap=$('progress-wrap'),bar=$('bar'),percent=$('percent'),result=$('result'),download=$('download'),resultVideo=$('result-video'),playbackNote=$('playback-note'),upload=$('teacher-video'),timeLimit=$('time-limit'),fileInfo=$('file-info'),introDownload=$('intro-download'),introStatus=$('intro-download-status'),introCancel=$('intro-download-cancel'),introReady=$('intro-download-ready'),introScreenHint=$('intro-screen-hint');
 // The final four-second still is already part of the intro video, with its music.
-const HOLD=0, MAX_SECONDS=300, MAX_EXPERIMENT_SECONDS=270, MAX_BYTES=100000000;
+// Recording runs in real time, so scene start-up, seeks and flush delays add to the output length;
+// RECORD_OVERHEAD_SECONDS keeps a maximum-length upload from tipping over the 5-minute cap.
+const HOLD=0, MAX_SECONDS=300, MAX_EXPERIMENT_SECONDS=265, RECORD_OVERHEAD_SECONDS=5, MAX_BYTES=100000000;
+// The recorder needs real frames before playback starts (otherwise the first moments are blank), and the Web Audio
+// to MediaRecorder path lags behind the video, so the very end needs extra time for the last music to arrive.
+const PREROLL_MS=400, END_TAIL_MS=1000, EXTRA_RECORD_SECONDS=(PREROLL_MS+END_TAIL_MS)/1000;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function preRoll(stream){
+ const track=stream.getVideoTracks()[0],end=performance.now()+PREROLL_MS;
+ while(performance.now()<end&&!stopRequested){render(false);try{track&&track.requestFrame&&track.requestFrame()}catch(e){}await sleep(33)}
+}
 // Metadata known at build time: keeps the upload duration check available without fetching either video.
 const INTRO_SECONDS=24.066426, OUTRO_SECONDS=5;
 
@@ -131,7 +141,7 @@ async function seek(el,t){
 }
 async function preview(){if(recording)return;if(previewActive)render(previewPlayer.currentTime>=18.4||previewPlayer.ended,true,previewPlayer);else render()}
 function clipLength(el,fallback){return Number.isFinite(el.duration)&&el.duration>0?el.duration:fallback}
-function maxTeacherDuration(){return Math.min(MAX_EXPERIMENT_SECONDS,Math.max(0,MAX_SECONDS-clipLength(video,INTRO_SECONDS)-clipLength(outro,OUTRO_SECONDS)-HOLD))}
+function maxTeacherDuration(){return Math.min(MAX_EXPERIMENT_SECONDS,Math.max(0,MAX_SECONDS-clipLength(video,INTRO_SECONDS)-clipLength(outro,OUTRO_SECONDS)-HOLD-RECORD_OVERHEAD_SECONDS))}
 function startClipLoading(el){if(!el.hasAttribute('src')){el.preload='auto';el.src=el.dataset.src;el.load()}}
 function ensureClip(el,signal){
  if(signal?.aborted)return Promise.reject(new DOMException('لغو شد','AbortError'));
@@ -260,7 +270,7 @@ async function finalizeSeekable(blob,expected){
  }finally{el.removeAttribute('src');el.load();URL.revokeObjectURL(url)}
  return fixed;
 }
-async function playScene(el,stage,completed,total,started){
+async function playScene(el,stage,completed,total,started,tailMs=120){
  if(stopRequested||sizeExceeded||timeExceeded)return;
  await seek(el,0);if(stopRequested||sizeExceeded||timeExceeded)return;
  $('progress-text').textContent=stage===0?'در حال آماده‌سازی سکانس آغازین...':stage===1?'در حال افزودن ویدیوی آزمایش...':'در حال افزودن سکانس پایانی...';
@@ -289,7 +299,11 @@ async function playScene(el,stage,completed,total,started){
   raf=requestAnimationFrame(tick);
  });
  // Allow Web Audio and MediaRecorder to flush the end of this scene's sound.
- if(!stopRequested&&!sizeExceeded&&!timeExceeded)await new Promise(resolve=>setTimeout(resolve,120));
+ if(!stopRequested&&!sizeExceeded&&!timeExceeded){
+  // Keep painting the last frame while the final audio reaches the recorder.
+  const tailEnd=performance.now()+tailMs;
+  while(performance.now()<tailEnd&&!stopRequested&&!sizeExceeded){if(stage===0)render(true,true);else paintScene(el);await sleep(33)}
+ }
  el.pause();
 }
 
@@ -301,6 +315,8 @@ function prepareAudio(){
 introDownload.addEventListener('click',async()=>{
  if(recording)return;
  introStatus.textContent='';introReady.hidden=true;
+ const missing=fields.find(f=>!f.value.trim());
+ if(missing){introStatus.textContent='ابتدا استان، منطقه، نام دبیر و موضوع آزمایش را کامل کنید.';missing.focus();return}
  const mime=findType();
  if(!mime||!canvas.captureStream||!(window.AudioContext||window.webkitAudioContext)){introStatus.textContent='این مرورگر از ساخت ویدیوی MP4 با صدا پشتیبانی نمی‌کند؛ از Chrome یا Edge به‌روز استفاده کنید.';return}
  stopPreview();resultVideo.pause();previewPlay.disabled=true;introDownload.disabled=true;button.disabled=true;upload.disabled=true;fields.forEach(x=>x.disabled=true);
@@ -313,13 +329,13 @@ introDownload.addEventListener('click',async()=>{
   recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:bitrateForDuration(video.duration+HOLD),audioBitsPerSecond:OUTPUT_AUDIO_BPS});
   recorder.ondataavailable=e=>{if(e.data.size){bytes+=e.data.size;if(bytes>MAX_BYTES){sizeExceeded=true;chunks=[]}else if(!sizeExceeded)chunks.push(e.data)}};
   const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=ev=>reject(ev.error||new Error('خطا هنگام ساخت پیش‌نمایش.'))});
-  recorder.start(500);const started=performance.now();await playScene(video,0,0,video.duration+HOLD,started);
+  recorder.start(500);const started=performance.now();await preRoll(stream);await playScene(video,0,0,video.duration+HOLD,started,END_TAIL_MS);
   if(recorder.state!=='inactive')recorder.stop();await stopped;
   if(stopRequested){introStatus.textContent='ساخت پیش‌نمایش لغو شد.';return}
   if(sizeExceeded||bytes>MAX_BYTES)throw new Error('حجم پیش‌نمایش بیش از ۱۰۰ مگابایت است.');
   if(timeExceeded||!chunks.length)throw new Error('ساخت پیش‌نمایش ناموفق بود؛ لطفاً دوباره تلاش کنید.');
   let blob=new Blob(chunks,{type:recorder.mimeType||mime});if(blob.size>MAX_BYTES)throw new Error('حجم پیش‌نمایش بیش از ۱۰۰ مگابایت است.');
-  chunks=[];introStatus.textContent='در حال آماده‌سازی نوار زمان ویدیو...';blob=await finalizeSeekable(blob,video.duration+HOLD);
+  chunks=[];introStatus.textContent='در حال آماده‌سازی نوار زمان ویدیو...';blob=await finalizeSeekable(blob,video.duration+HOLD+EXTRA_RECORD_SECONDS);
   if(stopRequested){introStatus.textContent='ساخت پیش‌نمایش لغو شد.';return}
   introUrl=URL.createObjectURL(blob);const ext=mime.startsWith('video/mp4')?'mp4':'webm';introReady.href=introUrl;introReady.download='pishnamayesh-azmayeshgah.'+ext;introReady.hidden=false;
   introStatus.textContent='پیش‌نمایش آماده است؛ اگر دانلود شروع نشد، روی دریافت مجدد بزنید.';introReady.click();
@@ -342,16 +358,17 @@ form.addEventListener('submit',async e=>{
   recorder.ondataavailable=e=>{if(e.data.size){bytes+=e.data.size;if(bytes>MAX_BYTES){sizeExceeded=true;chunks=[]}else if(!sizeExceeded)chunks.push(e.data)}};
   const stopped=new Promise((resolve,reject)=>{recorder.onstop=resolve;recorder.onerror=ev=>reject(ev.error||new Error('خطا هنگام ساخت ویدیو.'))});
   recorder.start(500);const started=performance.now();
+  await preRoll(stream);
   await playScene(video,0,0,total,started);
   await playScene(teacher,1,video.duration+HOLD,total,started);
-  await playScene(outro,2,video.duration+HOLD+teacher.duration,total,started);
+  await playScene(outro,2,video.duration+HOLD+teacher.duration,total,started,END_TAIL_MS);
   if(recorder.state!=='inactive')recorder.stop();await stopped;
   if(sizeExceeded||bytes>MAX_BYTES)throw new Error('حجم فایل نهایی از ۱۰۰ مگابایت بیشتر شد و ذخیره نشد. لطفاً ویدیوی کوتاه‌تری انتخاب کنید.');
   if(timeExceeded||performance.now()-started>MAX_SECONDS*1000)throw new Error('به علت طول ویدیو یا تأخیر هنگام ساخت، خروجی از ۵ دقیقه بیشتر شد و ذخیره نشد. لطفاً ویدیوی کوتاه‌تری انتخاب و صفحه را باز نگه دارید.');
   if(stopRequested){status.textContent='ساخت ویدیو لغو شد.';return}
   if(!chunks.length)throw new Error('فایلی تولید نشد؛ لطفاً دوباره تلاش کنید.');
   let blob=new Blob(chunks,{type:recorder.mimeType||mime});if(blob.size>MAX_BYTES)throw new Error('حجم فایل نهایی بیش از ۱۰۰ مگابایت است.');
-  chunks=[];$('progress-text').textContent='در حال آماده‌سازی نوار زمان ویدیو...';blob=await finalizeSeekable(blob,total);
+  chunks=[];$('progress-text').textContent='در حال آماده‌سازی نوار زمان ویدیو...';blob=await finalizeSeekable(blob,total+EXTRA_RECORD_SECONDS);
   if(stopRequested){status.textContent='ساخت ویدیو لغو شد.';return}
   if(resultUrl)URL.revokeObjectURL(resultUrl);resultUrl=URL.createObjectURL(blob);const ext=mime.startsWith('video/mp4')?'mp4':'webm';download.href=resultUrl;download.download='azmayeshgah.'+ext;
   $('format-note').textContent=`فرمت ${ext.toUpperCase()} · حجم ${(blob.size/1000000).toLocaleString('fa-IR',{maximumFractionDigits:1})} مگابایت · صدای سه سکانس`;
