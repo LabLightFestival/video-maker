@@ -13,7 +13,7 @@
 
 ## استقرار روی Vercel
 
-پوشه را به یک مخزن GitHub منتقل کنید و در Vercel گزینه Add New → Project را بزنید؛ مخزن را Import کنید و Framework Preset را Other انتخاب کنید. همه این فایل‌ها باید در ریشه پروژه باشند: `index.html`، `style.css`، `app.js`، `font.woff2`، `titr.woff2`، `bnazanin.woff2`، `sarbarg.webp`، `preview.jpg`، `logo.png`، `logo-body.png`، `logo-text.png`، `logo-r68-edge.png`، `logo-r68-side-l.png`، `logo-r68-side-r.png`، `video.mp4` و `outro.mp4`. نیازی به build command یا backend نیست. در صورت میزبانی ویدیوها در دامنه دیگر، آن میزبان باید CORS مناسبی برای استفاده در Canvas فراهم کند.
+پوشه را به یک مخزن GitHub منتقل کنید و در Vercel گزینه Add New → Project را بزنید؛ مخزن را Import کنید و Framework Preset را Other انتخاب کنید. همه این فایل‌ها باید در ریشه پروژه باشند: `index.html`، `style.css`، `app.js`، `media-fix.js`، `media-fix-source.js`، `MEDIABUNNY-LICENSE.txt`، `font.woff2`، `titr.woff2`، `bnazanin.woff2`، `sarbarg.webp`، `preview.jpg`، `logo.png`، `logo-body.png`، `logo-text.png`، `logo-r68-edge.png`، `logo-r68-side-l.png`، `logo-r68-side-r.png`، `video.mp4` و `outro.mp4`. نیازی به build command یا backend نیست. در صورت میزبانی ویدیوها در دامنه دیگر، آن میزبان باید CORS مناسبی برای استفاده در Canvas فراهم کند.
 
 برای آزمایش محلی: `python3 -m http.server 8000` و سپس باز کردن `http://localhost:8000` در مرورگر.
 
@@ -38,3 +38,7 @@
 یک ردیف ثابت «سال تحصیلی: ۱۴۰۵ - ۱۴۰۶» زیر موضوع آزمایش در پیش‌نمایش و خروجی سکانس آغازین اضافه می‌شود.
 
 کیفیت ویدیو بر اساس مدت تنظیم می‌شود تا ویدیوهای کوتاه با بیت‌ریت بالاتر ساخته شوند و طولانی‌ترین فایل‌ها از ۱۰۰ مگابایت فراتر نروند. اگر پخش ورودی به‌شدت عقب بماند یا زمان فایل نهایی ناهماهنگ باشد، خروجی رد می‌شود؛ این کنترل جایگزین آزمایش روی دستگاه‌های مختلف نیست.
+
+فایل خروجی قبل از ارائه در همان دستگاه، بدون بازکدگذاری، با کتابخانه Mediabunny نسخه ۱٫۶۶٫۰ دوباره بسته‌بندی می‌شود تا مدت و فهرست جست‌وجوی ویدیو ثبت شوند. کتابخانه با مجوز MPL-2.0 است؛ متن مجوز در `MEDIABUNNY-LICENSE.txt` و کد بسته در https://github.com/Vanilagy/mediabunny/tree/v1.66.0 قرار دارد. آماده‌سازی ممکن است به حافظه اضافی نیاز داشته باشد.
+
+برای بازسازی فایل بسته‌شده از کد واسط، نسخه ۱٫۶۶٫۰ کتابخانه `mediabunny` و ابزار `esbuild` را نصب و دستور `npx esbuild media-fix-source.js --bundle --format=esm --minify --target=es2020 --legal-comments=inline --outfile=media-fix.js` را اجرا کنید. این فایل در زمان ساخت ویدیو، فقط در مرورگر بارگذاری می‌شود.

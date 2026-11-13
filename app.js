@@ -210,13 +210,13 @@ function bitrateForDuration(seconds){
  return Math.max(1000000,Math.min(MAX_VIDEO_BPS,Math.floor(MAX_BYTES*.82*8/Math.max(1,seconds)-OUTPUT_AUDIO_BPS)));
 }
 // Do not offer recordings with corrupt/inflated timestamps as successful downloads.
-async function verifyRecording(blob,expected){
+async function verifyRecording(blob,expected,requireHeader=false){
  const url=URL.createObjectURL(blob), probe=document.createElement('video');probe.preload='metadata';probe.muted=true;
  try{
   const duration=await new Promise((resolve,reject)=>{
    let timer;const cleanup=()=>{clearTimeout(timer);probe.removeEventListener('loadedmetadata',check);probe.removeEventListener('durationchange',check);probe.removeEventListener('seeked',check);probe.removeEventListener('error',fail)};
    const fail=()=>{cleanup();reject(new Error('مرورگر نتوانست فایل ساخته‌شده را بررسی کند. از Chrome یا Edge به‌روز استفاده کنید.'))};
-   const check=()=>{if(Number.isFinite(probe.duration)&&probe.duration>0){const d=probe.duration;cleanup();resolve(d)}else if(probe.readyState>=1){try{probe.currentTime=1e8}catch(e){}}};
+   const check=()=>{if(Number.isFinite(probe.duration)&&probe.duration>0){const d=probe.duration;cleanup();resolve(d)}else if(probe.readyState>=1){if(requireHeader){cleanup();reject(new Error('مدت زمان ویدیو در فایل ثبت نشد؛ لطفاً با مرورگر دیگری تلاش کنید.'));return}try{probe.currentTime=1e8}catch(e){}}};
    probe.addEventListener('loadedmetadata',check);probe.addEventListener('durationchange',check);probe.addEventListener('seeked',check);probe.addEventListener('error',fail);
    timer=setTimeout(()=>{cleanup();reject(new Error('مدت فایل ساخته‌شده قابل بررسی نیست؛ مرورگر دیگری را امتحان کنید.'))},15000);
    probe.src=url;probe.load();
@@ -225,6 +225,30 @@ async function verifyRecording(blob,expected){
   if(Math.abs(duration-expected)>tolerance||duration>MAX_SECONDS)throw new Error('زمان ویدیو با زمان واقعی هماهنگ نیست و فایل خراب ذخیره نشد. صفحه را باز نگه دارید و با مرورگر یا دستگاه دیگر دوباره امتحان کنید.');
   return duration;
  }finally{probe.removeAttribute('src');probe.load();URL.revokeObjectURL(url)}
+}
+// Create a normal, indexed container entirely in the browser, without re-encoding.
+async function finalizeSeekable(blob,expected){
+ await verifyRecording(blob,expected); // Reject distorted timestamps before re-packaging.
+ let fixed;
+ try{
+  const {makeSeekable}=await import('./media-fix.js?v=seekable-31');
+  fixed=await makeSeekable(blob);
+ }catch(err){console.error('Seekable media preparation failed:',err);throw new Error('آماده‌سازی نوار زمان ویدیو ممکن نشد؛ مرورگر به‌روز یا دستگاه دیگری را امتحان کنید.');}
+ if(fixed.size>MAX_BYTES)throw new Error('حجم فایل نهایی از ۱۰۰ مگابایت بیشتر شد؛ ویدیوی آزمایش کوتاه‌تری انتخاب کنید.');
+ await verifyRecording(fixed,expected,true);
+ // Verify that the browser can move to the middle before offering the file.
+ const url=URL.createObjectURL(fixed), el=document.createElement('video');el.preload='metadata';el.muted=true;
+ try{
+  await new Promise((resolve,reject)=>{
+   let timer;const cleanup=()=>{clearTimeout(timer);el.removeEventListener('loadedmetadata',load);el.removeEventListener('seeked',done);el.removeEventListener('error',fail)};
+   const fail=()=>{cleanup();reject(new Error('مرورگر نتوانست نوار زمان ویدیو را بررسی کند.'))};
+   const done=()=>{if(Math.abs(el.currentTime-expected/2)<1){cleanup();resolve()}else fail()};
+   const load=()=>{try{el.currentTime=Math.min(expected/2,el.duration-.1)}catch(e){fail()}};
+   el.addEventListener('loadedmetadata',load);el.addEventListener('seeked',done);el.addEventListener('error',fail);
+   timer=setTimeout(fail,15000);el.src=url;el.load();
+  });
+ }finally{el.removeAttribute('src');el.load();URL.revokeObjectURL(url)}
+ return fixed;
 }
 async function playScene(el,stage,completed,total,started){
  if(stopRequested||sizeExceeded||timeExceeded)return;
@@ -282,8 +306,9 @@ introDownload.addEventListener('click',async()=>{
   if(stopRequested){introStatus.textContent='ساخت پیش‌نمایش لغو شد.';return}
   if(sizeExceeded||bytes>MAX_BYTES)throw new Error('حجم پیش‌نمایش بیش از ۱۰۰ مگابایت است.');
   if(timeExceeded||!chunks.length)throw new Error('ساخت پیش‌نمایش ناموفق بود؛ لطفاً دوباره تلاش کنید.');
-  const blob=new Blob(chunks,{type:recorder.mimeType||mime});if(blob.size>MAX_BYTES)throw new Error('حجم پیش‌نمایش بیش از ۱۰۰ مگابایت است.');
-  introStatus.textContent='در حال بررسی سلامت فایل...';await verifyRecording(blob,video.duration+HOLD);
+  let blob=new Blob(chunks,{type:recorder.mimeType||mime});if(blob.size>MAX_BYTES)throw new Error('حجم پیش‌نمایش بیش از ۱۰۰ مگابایت است.');
+  chunks=[];introStatus.textContent='در حال آماده‌سازی نوار زمان ویدیو...';blob=await finalizeSeekable(blob,video.duration+HOLD);
+  if(stopRequested){introStatus.textContent='ساخت پیش‌نمایش لغو شد.';return}
   introUrl=URL.createObjectURL(blob);const ext=mime.startsWith('video/mp4')?'mp4':'webm';introReady.href=introUrl;introReady.download='pishnamayesh-azmayeshgah.'+ext;introReady.hidden=false;
   introStatus.textContent='پیش‌نمایش آماده است؛ اگر دانلود شروع نشد، روی دریافت مجدد بزنید.';introReady.click();
  }catch(err){introStatus.textContent=stopRequested?'ساخت پیش‌نمایش لغو شد.':(err.message||'ساخت پیش‌نمایش ناموفق بود.');if(recorder&&recorder.state!=='inactive')recorder.stop()}
@@ -313,8 +338,9 @@ form.addEventListener('submit',async e=>{
   if(timeExceeded||performance.now()-started>MAX_SECONDS*1000)throw new Error('به علت طول ویدیو یا تأخیر هنگام ساخت، خروجی از ۵ دقیقه بیشتر شد و ذخیره نشد. لطفاً ویدیوی کوتاه‌تری انتخاب و صفحه را باز نگه دارید.');
   if(stopRequested){status.textContent='ساخت ویدیو لغو شد.';return}
   if(!chunks.length)throw new Error('فایلی تولید نشد؛ لطفاً دوباره تلاش کنید.');
-  const blob=new Blob(chunks,{type:recorder.mimeType||mime});if(blob.size>MAX_BYTES)throw new Error('حجم فایل نهایی بیش از ۱۰۰ مگابایت است.');
-  $('progress-text').textContent='در حال بررسی سلامت ویدیو...';await verifyRecording(blob,total);
+  let blob=new Blob(chunks,{type:recorder.mimeType||mime});if(blob.size>MAX_BYTES)throw new Error('حجم فایل نهایی بیش از ۱۰۰ مگابایت است.');
+  chunks=[];$('progress-text').textContent='در حال آماده‌سازی نوار زمان ویدیو...';blob=await finalizeSeekable(blob,total);
+  if(stopRequested){status.textContent='ساخت ویدیو لغو شد.';return}
   if(resultUrl)URL.revokeObjectURL(resultUrl);resultUrl=URL.createObjectURL(blob);const ext=mime.startsWith('video/mp4')?'mp4':'webm';download.href=resultUrl;download.download='azmayeshgah.'+ext;
   $('format-note').textContent=`فرمت ${ext.toUpperCase()} · حجم ${(blob.size/1000000).toLocaleString('fa-IR',{maximumFractionDigits:1})} مگابایت · صدای سه سکانس`;
   resultVideo.src=resultUrl;resultVideo.muted=false;result.hidden=false;
