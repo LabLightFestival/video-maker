@@ -9,7 +9,7 @@ const form=$('form'),button=$('generate'),cancel=$('cancel'),status=$('status'),
 const HOLD=0, MAX_SECONDS=300, MAX_EXPERIMENT_SECONDS=265, RECORD_OVERHEAD_SECONDS=5, MAX_BYTES=100000000;
 // The recorder needs real frames before playback starts (otherwise the first moments are blank), and the Web Audio
 // to MediaRecorder path lags behind the video, so the very end needs extra time for the last music to arrive.
-const PREROLL_MS=400, END_TAIL_MS=1000, EXTRA_RECORD_SECONDS=(PREROLL_MS+END_TAIL_MS)/1000;
+const PREROLL_MS=150, END_TAIL_MS=800, EXTRA_RECORD_SECONDS=(PREROLL_MS+END_TAIL_MS)/1000;
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 async function preRoll(stream){
  const track=stream.getVideoTracks()[0],end=performance.now()+PREROLL_MS;
