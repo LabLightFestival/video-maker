@@ -47,6 +47,8 @@ async function releaseWakeLock(){const lock=wakeSentinel;wakeSentinel=null;if(lo
 document.addEventListener('visibilitychange',()=>{if(recording&&document.visibilityState==='visible')void keepScreenAwake()});
 const fontReady=document.fonts.load('700 27px BTitr');
 const poster=new Image();poster.src='preview.jpg?v=new-intro-19';poster.onload=()=>{if(!recording&&!previewActive)render()};
+// A non-black frame from the opening fade keeps the first captured frame visible.
+const firstFrame=new Image();firstFrame.src='start-frame.jpg?v=32';
 const fa=n=>Math.round(n).toLocaleString('fa-IR');
 function timeString(s){s=Math.max(0,Math.floor(s));return `${fa(Math.floor(s/60))} دقیقه و ${fa(s%60)} ثانیه`}
 function roundedRect(x,y,w,h,r){
@@ -81,7 +83,10 @@ function drawSchoolYearBox(frame,animated,part='both'){
 }
 function render(showText=true,animated=false,previewFrame=null){
  const frame=previewFrame||video;
- if(previewFrame){if(frame.readyState<2)return;ctx.drawImage(frame,0,0,1280,720);}
+ if((previewFrame||recording)&&frame.currentTime<0.3){
+  if(firstFrame.complete&&firstFrame.naturalWidth)ctx.drawImage(firstFrame,0,0,1280,720);
+  else{ctx.fillStyle='#f1ece0';ctx.fillRect(0,0,1280,720)}
+ }else if(previewFrame){if(frame.readyState<2)return;ctx.drawImage(frame,0,0,1280,720);}
  else if(!recording&&poster.complete&&poster.naturalWidth)ctx.drawImage(poster,0,0,1280,720);
  else {if(frame.readyState<2)return;ctx.drawImage(frame,0,0,1280,720);}
  if(showText||animated)drawSchoolYearBox(frame,animated);
@@ -130,16 +135,21 @@ function maxTeacherDuration(){return Math.min(MAX_EXPERIMENT_SECONDS,Math.max(0,
 function startClipLoading(el){if(!el.hasAttribute('src')){el.preload='auto';el.src=el.dataset.src;el.load()}}
 function ensureClip(el,signal){
  if(signal?.aborted)return Promise.reject(new DOMException('لغو شد','AbortError'));
- if(el.hasAttribute('src')&&el.readyState>=2)return Promise.resolve();
+ if(el.hasAttribute('src')&&el.readyState>=2&&!el.error)return Promise.resolve();
  return new Promise((resolve,reject)=>{
   let timer;
   const cleanup=()=>{clearTimeout(timer);el.removeEventListener('loadeddata',ready);el.removeEventListener('error',fail);signal?.removeEventListener('abort',abort)};
+  const resetStatic=()=>{if(el.dataset.src){el.removeAttribute('src');el.load()}};
   const ready=()=>{cleanup();resolve()};
-  const fail=()=>{cleanup();reject(new Error('بارگذاری سکانس آماده انجام نشد؛ اتصال اینترنت را بررسی کنید.'))};
-  const abort=()=>{cleanup();if(el.readyState<2){el.removeAttribute('src');el.load()}reject(new DOMException('لغو شد','AbortError'))};
+  const fail=()=>{cleanup();resetStatic();reject(new Error(el===teacher?'خواندن ویدیوی آزمایش ممکن نشد؛ فایل دیگری را امتحان کنید.':'بارگذاری سکانس آماده انجام نشد؛ اتصال اینترنت را بررسی کنید.'))};
+  const abort=()=>{cleanup();if(el.readyState<2)resetStatic();reject(new DOMException('لغو شد','AbortError'))};
   el.addEventListener('loadeddata',ready,{once:true});el.addEventListener('error',fail,{once:true});signal?.addEventListener('abort',abort,{once:true});
-  timer=setTimeout(()=>{cleanup();reject(new Error('بارگذاری سکانس بیش از حد طول کشید؛ اتصال اینترنت را بررسی کنید.'))},90000);
-  startClipLoading(el);if(el.readyState>=2)ready();
+  timer=setTimeout(()=>{cleanup();resetStatic();reject(new Error('بارگذاری ویدیو بیش از حد طول کشید؛ اتصال اینترنت یا فایل را بررسی کنید.'))},90000);
+  el.preload='auto';
+  if(el.dataset.src&&(!el.hasAttribute('src')||el.error)){resetStatic();startClipLoading(el)}
+  else if(el.hasAttribute('src'))el.load();
+  else{cleanup();reject(new Error('فایل ویدیو انتخاب نشده است.'));return}
+  if(el.readyState>=2)ready();
  });
 }
 function checkUpload(){
@@ -154,7 +164,7 @@ function checkUpload(){
  }
  upload.setCustomValidity('');fileInfo.className='file-info';fileInfo.textContent=`مدت ویدیوی آزمایش: ${timeString(teacher.duration)} · مجموع تقریبی: ${timeString(clipLength(video,INTRO_SECONDS)+HOLD+teacher.duration+clipLength(outro,OUTRO_SECONDS))} از ۵ دقیقه`;return true;
 }
-fields.forEach(f=>f.addEventListener('input',()=>{if(!recording){if(introUrl){URL.revokeObjectURL(introUrl);introUrl=null;introReady.hidden=true;introStatus.textContent='برای دریافت اطلاعات جدید، پیش‌نمایش را دوباره بسازید.'}preview()}}));
+fields.forEach(f=>f.addEventListener('input',()=>{if(f.tagName==='INPUT')f.setCustomValidity(f.value&&!f.value.trim()?'این فیلد نمی‌تواند فقط فاصله باشد.':'');if(!recording){if(introUrl){URL.revokeObjectURL(introUrl);introUrl=null;introReady.hidden=true;introStatus.textContent='برای دریافت اطلاعات جدید، پیش‌نمایش را دوباره بسازید.'}preview()}}));
 
 function updatePreviewButton(){
  previewPlay.textContent=previewPlaying?'❚❚':'▶';
@@ -186,7 +196,7 @@ previewPlay.addEventListener('click',async()=>{
   if(!previewPlayer.ended)await previewPlayer.play();
   if(token!==previewToken){previewPlayer.pause();return}
   previewPlaying=true;updatePreviewButton();previewRaf=requestAnimationFrame(previewTick);
- }catch(e){if(token===previewToken){stopPreview();status.textContent='پخش پیش‌نمایش ممکن نشد. لطفاً دوباره تلاش کنید.';preview()}}
+ }catch(e){if(token===previewToken){stopPreview();if(previewPlayer.error){previewPlayer.removeAttribute('src');previewPlayer.load()}status.textContent='پخش پیش‌نمایش ممکن نشد. لطفاً دوباره تلاش کنید.';preview()}}
  finally{if(token===previewToken)previewPlay.disabled=false}
 });
 video.addEventListener('loadedmetadata',()=>{preview();checkUpload()});outro.addEventListener('loadedmetadata',checkUpload);
@@ -201,7 +211,7 @@ upload.addEventListener('change',()=>{
 });
 teacher.addEventListener('loadedmetadata',checkUpload);
 teacher.addEventListener('error',()=>{if(!upload.files.length)return;const msg='این فایل قابل پخش نیست. لطفاً یک ویدیوی MP4 یا WebM سازگار با مرورگر انتخاب کنید.';upload.setCustomValidity(msg);fileInfo.className='file-info error';fileInfo.textContent=msg});
-function findType(){if(!window.MediaRecorder)return '';return ['video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4','video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(t=>MediaRecorder.isTypeSupported(t))||''}
+function findType(){if(!window.MediaRecorder)return '';return ['video/mp4;codecs=avc1.42E01F,mp4a.40.2','video/mp4;codecs=avc1.42E01E,mp4a.40.2','video/mp4;codecs=avc1.64001F,mp4a.40.2','video/mp4'].find(t=>MediaRecorder.isTypeSupported(t))||''}
 function paintScene(el){ctx.fillStyle='#000';ctx.fillRect(0,0,1280,720);const scale=Math.min(1280/el.videoWidth,720/el.videoHeight),w=el.videoWidth*scale,h=el.videoHeight*scale;ctx.drawImage(el,(1280-w)/2,(720-h)/2,w,h)}
 function progress(value,total){const p=Math.max(0,Math.min(100,100*value/total));if(introMode)introStatus.textContent=`در حال ساخت پیش‌نمایش... ${fa(p)}٪` ;else{bar.style.width=p+'%';percent.textContent=fa(p)+'٪'}}
 // Budget the video bitrate by total duration, leaving headroom under 100 MB.
@@ -278,6 +288,8 @@ async function playScene(el,stage,completed,total,started){
   }
   raf=requestAnimationFrame(tick);
  });
+ // Allow Web Audio and MediaRecorder to flush the end of this scene's sound.
+ if(!stopRequested&&!sizeExceeded&&!timeExceeded)await new Promise(resolve=>setTimeout(resolve,120));
  el.pause();
 }
 
@@ -290,7 +302,7 @@ introDownload.addEventListener('click',async()=>{
  if(recording)return;
  introStatus.textContent='';introReady.hidden=true;
  const mime=findType();
- if(!mime||!canvas.captureStream||!(window.AudioContext||window.webkitAudioContext)){introStatus.textContent='مرورگر از ساخت ویدیو پشتیبانی نمی‌کند؛ از Chrome یا Edge به‌روز استفاده کنید.';return}
+ if(!mime||!canvas.captureStream||!(window.AudioContext||window.webkitAudioContext)){introStatus.textContent='این مرورگر از ساخت ویدیوی MP4 با صدا پشتیبانی نمی‌کند؛ از Chrome یا Edge به‌روز استفاده کنید.';return}
  stopPreview();resultVideo.pause();previewPlay.disabled=true;introDownload.disabled=true;button.disabled=true;upload.disabled=true;fields.forEach(x=>x.disabled=true);
  recording=true;introMode=true;stopRequested=false;sizeExceeded=false;timeExceeded=false;introCancel.hidden=false;introScreenHint.hidden=false;introStatus.textContent='در حال آماده‌سازی پیش‌نمایش...';void keepScreenAwake();
  if(introUrl){URL.revokeObjectURL(introUrl);introUrl=null}let stream=null,chunks=[],bytes=0;loadingController=new AbortController();
@@ -311,18 +323,18 @@ introDownload.addEventListener('click',async()=>{
   if(stopRequested){introStatus.textContent='ساخت پیش‌نمایش لغو شد.';return}
   introUrl=URL.createObjectURL(blob);const ext=mime.startsWith('video/mp4')?'mp4':'webm';introReady.href=introUrl;introReady.download='pishnamayesh-azmayeshgah.'+ext;introReady.hidden=false;
   introStatus.textContent='پیش‌نمایش آماده است؛ اگر دانلود شروع نشد، روی دریافت مجدد بزنید.';introReady.click();
- }catch(err){introStatus.textContent=stopRequested?'ساخت پیش‌نمایش لغو شد.':(err.message||'ساخت پیش‌نمایش ناموفق بود.');if(recorder&&recorder.state!=='inactive')recorder.stop()}
+ }catch(err){loadingController?.abort();introStatus.textContent=stopRequested?'ساخت پیش‌نمایش لغو شد.':(err.message||'ساخت پیش‌نمایش ناموفق بود.');if(recorder&&recorder.state!=='inactive')recorder.stop()}
  finally{cancelAnimationFrame(raf);video.pause();if(stream)stream.getTracks().filter(t=>t.kind==='video').forEach(t=>t.stop());recording=false;loadingController=null;void releaseWakeLock();introMode=false;previewPlay.disabled=false;introDownload.disabled=false;button.disabled=false;upload.disabled=false;fields.forEach(x=>x.disabled=false);introCancel.hidden=true;introScreenHint.hidden=true;await preview()}
 });
 introCancel.addEventListener('click',()=>{stopRequested=true;loadingController?.abort()});
 form.addEventListener('submit',async e=>{
- e.preventDefault();if(recording)return;status.textContent='';resultVideo.pause();resultVideo.removeAttribute('src');resultVideo.load();playbackNote.textContent='';result.hidden=true;
- const mime=findType();if(!mime||!canvas.captureStream||!(window.AudioContext||window.webkitAudioContext)){status.textContent='مرورگر شما از ساخت ویدیو با صدا پشتیبانی نمی‌کند. از Chrome یا Edge به‌روز استفاده کنید.';return}
+ e.preventDefault();if(recording)return;status.textContent='';resultVideo.pause();resultVideo.removeAttribute('src');resultVideo.load();if(resultUrl){URL.revokeObjectURL(resultUrl);resultUrl=null;download.removeAttribute('href')}playbackNote.textContent='';result.hidden=true;
+ const mime=findType();if(!mime||!canvas.captureStream||!(window.AudioContext||window.webkitAudioContext)){status.textContent='این مرورگر از ساخت ویدیوی MP4 با صدا پشتیبانی نمی‌کند؛ از Chrome یا Edge به‌روز استفاده کنید.';return}
  if(!checkUpload()){upload.reportValidity();return}
  stopPreview();previewPlay.disabled=true;introDownload.disabled=true;recording=true;stopRequested=false;sizeExceeded=false;timeExceeded=false;button.disabled=true;upload.disabled=true;fields.forEach(x=>x.disabled=true);cancel.hidden=false;wrap.hidden=false;bar.style.width='0%';percent.textContent='۰٪';void keepScreenAwake();let stream=null;let chunks=[],bytes=0;loadingController=new AbortController();
  try{
   $('progress-text').textContent='در حال دریافت سکانس‌های آماده...';
-  await Promise.all([prepareAudio(),fontReady,ensureClip(video,loadingController.signal),ensureClip(outro,loadingController.signal)]);
+  await Promise.all([prepareAudio(),fontReady,ensureClip(video,loadingController.signal),ensureClip(teacher,loadingController.signal),ensureClip(outro,loadingController.signal)]);
   const total=video.duration+HOLD+teacher.duration+outro.duration;
   video.pause();await seek(video,0);render(false);
   stream=canvas.captureStream(30);audioDest.stream.getAudioTracks().forEach(t=>stream.addTrack(t));
@@ -351,7 +363,7 @@ form.addEventListener('submit',async e=>{
    try{await resultVideo.play();playbackNote.textContent='پیش‌نمایش بی‌صدا پخش می‌شود؛ برای شنیدن صدا، از کنترل ویدیو صدا را روشن کنید.'}
    catch(secondError){resultVideo.muted=false;playbackNote.textContent='برای تماشای ویدیو، دکمه پخش را بزنید.'}
   }
- }catch(err){status.textContent=stopRequested?'ساخت ویدیو لغو شد.':(err.message||'ساخت ویدیو ناموفق بود. لطفاً دوباره تلاش کنید.');if(recorder&&recorder.state!=='inactive')recorder.stop()}
+ }catch(err){loadingController?.abort();status.textContent=stopRequested?'ساخت ویدیو لغو شد.':(err.message||'ساخت ویدیو ناموفق بود. لطفاً دوباره تلاش کنید.');if(recorder&&recorder.state!=='inactive')recorder.stop()}
  finally{cancelAnimationFrame(raf);[video,teacher,outro].forEach(v=>v.pause());if(stream)stream.getTracks().filter(t=>t.kind==='video').forEach(t=>t.stop());recording=false;loadingController=null;void releaseWakeLock();previewPlay.disabled=false;introDownload.disabled=false;button.disabled=false;upload.disabled=false;fields.forEach(x=>x.disabled=false);cancel.hidden=true;wrap.hidden=true;await preview()}
 });
 cancel.addEventListener('click',()=>{stopRequested=true;loadingController?.abort()});
